@@ -9,12 +9,12 @@ namespace PsdBasesSetter.Crypto
     public class BasePasswords
     {
 
-        private const String PsdPassSalt = "psd_salt-v1";
-        private const String PCBasePassSalt = "pc_base_salt-v1";
-        private const String PhoneBasePassSalt = "phone_base_salt-v1";
+        private const String PSD_PASS_SALT = "psd_salt-v2";
+        private const String PC_BASE_PASS_SALT = "pc_base_salt-v2";
+        private const String PHONE_BASE_PASS_SALT = "phone_base_salt-v2";
 
-        private const byte MaxKeyBytes = 32;
-
+        private const byte KEY_LENGTH = 32;
+        private const int ITERATIONS_COUNT = 10000;
 
         public byte[] PhonePassword { get; private set; }
         public byte[] BasePassword { get; private set; }
@@ -31,15 +31,15 @@ namespace PsdBasesSetter.Crypto
 
         private byte[] GeneratePcPassword(String pass)
         {
-            return GenerateKey(pass, PCBasePassSalt);
+            return GenerateKey(pass, PC_BASE_PASS_SALT);
         }
         private byte[] GeneratePhonePassword(String pass)
         {
-            return GenerateKey(pass, PhoneBasePassSalt);
+            return GenerateKey(pass, PHONE_BASE_PASS_SALT);
         }
         private byte[] GeneratePsdPassword(String pass)
         {
-            return GenerateKey(pass, PsdPassSalt);
+            return GenerateKey(pass, PSD_PASS_SALT);
         }
 
         private static byte[] GenerateKey(String pass, String salt)
@@ -47,16 +47,10 @@ namespace PsdBasesSetter.Crypto
             byte[] passBytes = Encoding.ASCII.GetBytes(pass);
             byte[] saltBytes = Encoding.ASCII.GetBytes(salt);
 
-            SHA256 mySha256 = SHA256.Create();
-            byte[] passHash = mySha256.ComputeHash(passBytes);
+            Rfc2898DeriveBytes rfc2898DeriveBytes = new Rfc2898DeriveBytes(passBytes, saltBytes, ITERATIONS_COUNT);
+            byte[] hash = rfc2898DeriveBytes.GetBytes(KEY_LENGTH);
 
-
-            byte[] saltedHash = mySha256.ComputeHash(ConcatArrays(passHash, saltBytes));
-            byte[] resKey = new byte[MaxKeyBytes];
-
-            Array.Copy(saltedHash, resKey, MaxKeyBytes); //i know that Sha256 will give me 32 bytes key. 
-
-            return resKey;
+            return hash;
         }
 
         private static byte[] ConcatArrays(byte[] arr1, byte[] arr2)
