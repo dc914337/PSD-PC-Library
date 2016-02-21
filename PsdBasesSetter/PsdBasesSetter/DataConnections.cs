@@ -138,12 +138,26 @@ namespace PsdBasesSetter
 
             if (PhoneBase != null && PsdBase != null)
             {
+                PhoneBase.Base.PassGroup.Passwords = new PasswordList();
+                foreach (var item in PcBase.Base.PassGroup)
+                {
+                    PhoneBase.Base.PassGroup.Passwords.Add((ushort)item.Id, item.GetCopy());
+                }
+
                 PhoneBase.Base.BTKey = btKey;
                 PhoneBase.Base.HBTKey = hBtKEy;
 
+                PsdBase.Base.PassGroup.Passwords = new PasswordList();
+                foreach (var item in PcBase.Base.PassGroup)
+                {
+                    PsdBase.Base.PassGroup.Passwords.Add((ushort)item.Id, item.GetCopy());
+                }
+
                 PsdBase.Base.BTKey = btKey;
                 PsdBase.Base.HBTKey = hBtKEy;
+
             }
+
 
 
             foreach (var passItem in PcBase.Base.PassGroup)

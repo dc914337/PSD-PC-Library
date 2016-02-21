@@ -28,12 +28,12 @@ namespace PsdBasesSetter.Repositories.Objects
             TranslatePasswordFromStrings();
         }
 
-        public PassItem(String UUID, String tags, Strings strings, byte[] password)
+        public PassItem(ushort? id, String UUID, String tags, Strings strings, byte[] password)
         {
-            Id = null;
+            Id = id;
             this.UUID = UUID;
-            this.Tags = tags;
-            this.Strings = strings.GetCopy();
+            Tags = tags;
+            Strings = strings.GetCopy();
             TranslatePasswordFromStrings();
             Pass = password;
         }
@@ -136,7 +136,7 @@ namespace PsdBasesSetter.Repositories.Objects
 
         public PassItem GetCopy()
         {
-            return new PassItem(UUID, Tags, Strings, Pass);
+            return new PassItem(Id, UUID, Tags, Strings, Pass);
         }
 
         public override string ToString()
