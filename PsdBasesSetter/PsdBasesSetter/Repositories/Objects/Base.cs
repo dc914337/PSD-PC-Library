@@ -17,11 +17,12 @@ namespace PsdBasesSetter.Repositories.Objects
         [JsonConverter(typeof(ByteArrayConverter))]
         public byte[] HBTKey { get; set; }
 
-        public PasswordList Passwords { get; set; }
+        [DataMember]
+        public PassGroup PassGroup { get; set; } = new PassGroup();
 
         public Base()
         {
-            Passwords = new PasswordList();
+            PassGroup = new PassGroup();
         }
     }
 }

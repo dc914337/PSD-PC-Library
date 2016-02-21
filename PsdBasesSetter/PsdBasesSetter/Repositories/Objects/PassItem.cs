@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
 using PsdBasesSetter.Repositories.Serializers;
+using System.Collections.Generic;
 
 namespace PsdBasesSetter.Repositories.Objects
 {
@@ -11,99 +12,145 @@ namespace PsdBasesSetter.Repositories.Objects
     [DataContract]
     public class PassItem
     {
-        private const char SEPARATOR = '\t';
+        const string PASSWORD_KEY = "Password";
 
         public PassItem()
         {
         }
 
 
-        public PassItem(string title, byte[] password)
+        public PassItem(String UUID, String tags, Strings strings)
         {
             Id = null;
-            Title = title;
-            Login = null;
-            EnterWithLogin = false;
-            Pass = password;
-            Description = null;
+            this.UUID = UUID;
+            this.Tags = tags;
+            this.Strings = strings.GetCopy();
+            TranslatePasswordFromStrings();
         }
 
-        public PassItem(string title, string login, bool enterWithLogin, byte[] password, string description)
+        public PassItem(String UUID, String tags, Strings strings, byte[] password)
         {
             Id = null;
-            Title = title;
-            Login = login;
-            EnterWithLogin = enterWithLogin;
+            this.UUID = UUID;
+            this.Tags = tags;
+            this.Strings = strings.GetCopy();
+            TranslatePasswordFromStrings();
             Pass = password;
-            Description = description;
         }
 
-        public PassItem(ushort? index, string title, string login, bool enterWithLogin, byte[] password, string description)
+
+        private void TranslatePasswordFromStrings()
         {
-            Id = index;
-            Title = title;
-            Login = login;
-            EnterWithLogin = enterWithLogin;
-            Pass = password;
-            Description = description;
+            if (Strings.ContainsKey(PASSWORD_KEY))
+            {
+                SetPassFromString(Strings[PASSWORD_KEY]);
+                Strings.Remove(PASSWORD_KEY);
+            }
         }
 
+
+        public void SetPassFromString(String pass)
+        {
+            Pass = Encoding.ASCII.GetBytes(pass);
+        }
 
         public byte[] GetBytes()
         {
-            if (EnterWithLogin)
-                return Encoding.UTF8.GetBytes(Login).Concat(GetBytesFromChar(SEPARATOR)).Concat(Pass).ToArray();
-
             return Pass;
         }
 
-        private static byte[] GetBytesFromChar(char ch)
+        public string Title
         {
-            return Encoding.UTF8.GetBytes(
-                new char[]
-                {
-                    ch
-                });
+            get
+            {
+                string val;
+                return Strings.TryGetValue("Title", out val) ? val : String.Empty;
+            }
+            set
+            {
+                Strings.TryAdd("Title", value);
+            }
         }
 
+        public string Login
+        {
+            get
+            {
+                string val;
+                return Strings.TryGetValue("Login", out val) ? val : String.Empty;
+            }
+            set
+            {
+                Strings.TryAdd("Login", value);
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                string val;
+                return Strings.TryGetValue("Description", out val) ? val : String.Empty;
+            }
+            set
+            {
+                Strings.TryAdd("Description", value);
+            }
+        }
+
+        public bool EnterWithLogin
+        {
+            get
+            {
+                string val;
+                bool getVal = Strings.TryGetValue("EnterWithLogin", out val);
+                if (!getVal)
+                    return false;
+                bool res;
+                return bool.TryParse(val, out res) ? res : false;
+            }
+            set
+            {
+                Strings.TryAdd("EnterWithLogin", value.ToString());
+            }
+        }
+
+
+
+
+        [DataMember]
+        public String UUID { get; set; }
+        [DataMember]
+        public String Tags { get; set; }
+        [DataMember]
+        public Strings Strings { get; set; } = new Strings();
 
         [DataMember]
         public ushort? Id { get; set; }
 
-        [DataMember]
-        public string Title { get; set; } = String.Empty;
-
-        [DataMember]
-        public string Login { get; set; } = String.Empty;
-
-        [DataMember]
-        public bool EnterWithLogin { get; set; } = false;
 
         [DataMember]
         [JsonConverter(typeof(ByteArrayConverter))]
         public byte[] Pass { get; set; } = new byte[0];
 
-        [DataMember]
-        public string Description { get; set; } = String.Empty;
 
         public PassItem GetCopy()
         {
-            return new PassItem(Id, Title, Login, EnterWithLogin, Pass, Description);
+            return new PassItem(UUID, Tags, Strings, Pass);
         }
 
         public override string ToString()
         {
-            return Title;
+            return UUID;
         }
 
         public void RestoreCopy(PassItem backup)
         {
             this.Id = backup.Id;
-            this.Title = backup.Title;
-            this.Login = backup.Login;
-            this.EnterWithLogin = backup.EnterWithLogin;
+            this.UUID = backup.UUID;
+            this.Tags = backup.Tags;
+            this.Strings = backup.Strings.GetCopy();
             this.Pass = backup.Pass;
-            this.Description = backup.Description;
         }
     }
 }

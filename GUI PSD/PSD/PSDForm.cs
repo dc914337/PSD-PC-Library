@@ -13,7 +13,7 @@ namespace PSD
         private DataConnections _connections;
         private DateTime _lastChanges;
 
-        private PasswordList _passwords => _connections.Passwords ?? new PasswordList();
+        private PassGroup _rootPassGroup => _connections.RootGroup ?? new PassGroup();
 
         public PSDForm(DataConnections dataConnections)
         {
@@ -87,7 +87,7 @@ namespace PSD
 
         private bool Contains(PassItem pass)
         {
-            return _connections.PcBase.Base.Passwords.Any(a => a.Key == pass.Id && a.Value != pass);
+            return _connections.PcBase.Base.PassGroup.Any(a => a.Id == pass.Id && a != pass);
         }
 
 
@@ -98,18 +98,18 @@ namespace PSD
             var selectedIndex = lstPasses.SelectedIndex;
 
             var newPassword = new PassItem();
-            
+
             if (!EditPassword(newPassword))
                 return;
 
-            _passwords.AddPass(newPassword);
+            _rootPassGroup.AddPass(newPassword);
             if (selectedIndex != -1 && selectedIndex != lstPasses.Items.Count - 1)
             {
                 while (newPassword.Id > ((PassItem)lstPasses.SelectedItem).Id)
                 {
-                    _passwords.MoveUp(newPassword);
+                    _rootPassGroup.Passwords.MoveUp(newPassword);
                 }
-                _passwords.MoveDown(newPassword);
+                _rootPassGroup.Passwords.MoveDown(newPassword);
             }
             RegisterChange();
             RefillPasswordsList();
@@ -170,14 +170,14 @@ namespace PSD
         {
             if (lstPasses.SelectedItem != null)
             {
-                _passwords.RemovePass((ushort)((PassItem)lstPasses.SelectedItem).Id);
+                _rootPassGroup.Passwords.RemovePass((ushort)((PassItem)lstPasses.SelectedItem).Id);
                 RefillPasswordsList();
             }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            _passwords.FillEmptySpaces();
+            _rootPassGroup.Passwords.FillEmptySpaces();
             RefillPasswordsList();
         }
 
@@ -189,9 +189,9 @@ namespace PSD
         {
             var selectedItem = lstPasses.SelectedItem;
             lstPasses.Items.Clear();
-            foreach (var keyValuePair in _passwords)
+            foreach (var keyValuePair in _rootPassGroup)
             {
-                lstPasses.Items.Add(keyValuePair.Value);
+                lstPasses.Items.Add(keyValuePair);
             }
             lstPasses.SelectedItem = selectedItem;
 
@@ -205,7 +205,7 @@ namespace PSD
             var selectedPass = (PassItem)lstPasses.SelectedItem;
             if (selectedPass == null)
                 return;
-            if (_passwords.MoveUp(selectedPass))
+            if (_rootPassGroup.Passwords.MoveUp(selectedPass))
             {
                 RegisterChange();
                 RefillPasswordsList();
@@ -217,7 +217,7 @@ namespace PSD
             var selectedPass = (PassItem)lstPasses.SelectedItem;
             if (selectedPass == null)
                 return;
-            if (_passwords.MoveDown(selectedPass))
+            if (_rootPassGroup.Passwords.MoveDown(selectedPass))
             {
                 RegisterChange();
                 RefillPasswordsList();

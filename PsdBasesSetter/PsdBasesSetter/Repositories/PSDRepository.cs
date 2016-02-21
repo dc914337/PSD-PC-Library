@@ -52,7 +52,7 @@ namespace PsdBasesSetter.Repositories
             if (!Psd.Login(LoginPass))
                 return false;
             Psd.WriteKeys(Base.BTKey, Base.HBTKey);
-            var psdConverted = GetPreparedPasswords(Base.Passwords);
+            var psdConverted = GetPreparedPasswords(Base.PassGroup.ToList());
             int wrote = Psd.WritePasswords(psdConverted);
 
             var result = wrote == psdConverted.Count();
@@ -63,12 +63,12 @@ namespace PsdBasesSetter.Repositories
 
 
         //We think that here passwords are without spaces(no empty indexes). But it's not. We need either resort passwords or allow empty indexes
-        private List<byte[]> GetPreparedPasswords(PasswordList passes)
+        private List<byte[]> GetPreparedPasswords(IEnumerable<PassItem> passes)
         {
             List<byte[]> psdConverted = new List<byte[]>();
             foreach (var pass in passes)
             {
-                psdConverted.Add(pass.Value.Pass);
+                psdConverted.Add(pass.Pass);
             }
             return psdConverted;
         }

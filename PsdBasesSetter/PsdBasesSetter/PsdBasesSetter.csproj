@@ -60,8 +60,11 @@
     <Compile Include="Repositories\FileRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
     <Compile Include="Repositories\Objects\Base.cs" />
+    <Compile Include="Repositories\Objects\PassGroup.cs" />
+    <Compile Include="Repositories\Objects\PassGroupsList.cs" />
     <Compile Include="Repositories\Objects\PassItem.cs" />
     <Compile Include="Repositories\Objects\PasswordList.cs" />
+    <Compile Include="Repositories\Objects\Strings.cs" />
     <Compile Include="Repositories\PSDRepository.cs" />
     <Compile Include="Repositories\Serializers\JSONWorker.cs" />
     <Compile Include="Repositories\Serializers\Serializer.cs" />

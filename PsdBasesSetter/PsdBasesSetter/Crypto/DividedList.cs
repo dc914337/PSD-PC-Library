@@ -9,45 +9,37 @@ using PsdBasesSetter.Repositories.Objects;
 namespace PsdBasesSetter.Crypto
 {
 
-    class DividedList
+    class DividedPassword
     {
         public const int MaxPassLength = 128;
 
-        public PasswordList Part1List { get; set; } = new PasswordList();
-        public PasswordList Part2List { get; set; } = new PasswordList();
+        public PassItem SrcPass;
+        public byte[] Part1 { get; set; } = new byte[MaxPassLength];
+        public byte[] Part2 { get; set; } = new byte[MaxPassLength];
         RNGCryptoServiceProvider _rngCsp = new RNGCryptoServiceProvider();
 
-        public DividedList(PasswordList mainList)
+        public DividedPassword(PassItem pass)
         {
-            foreach (var pass in mainList)
-            {
-                DivideAndAdd(pass.Value);
-            }
-
-
+            SrcPass = pass;
+            DivideAndAdd(pass);
             _rngCsp.Dispose();
         }
 
 
         private void DivideAndAdd(PassItem pass)
         {
-            var passPart1Bytes = new byte[MaxPassLength];
-            _rngCsp.GetBytes(passPart1Bytes);
+            var passPart2Bytes = new byte[MaxPassLength];
+            _rngCsp.GetBytes(passPart2Bytes);
 
             var realPassBytes = pass.GetBytes();
 
-            var passPart2Bytes = XORArrays(passPart1Bytes, realPassBytes);
+            var passPart1Bytes = XORArrays(passPart2Bytes, realPassBytes);
 
-            if (!CheckCorrect(passPart1Bytes, passPart2Bytes, realPassBytes))
+            if (!CheckCorrect(passPart2Bytes, passPart1Bytes, realPassBytes))
                 throw new Exception("WTF? Xor worked funny..");
 
-            var part1Pass = pass.GetCopy();
-            part1Pass.Pass = passPart1Bytes;
-            Part1List.Add(part1Pass.Id.Value, part1Pass);
-
-            var part2Pass = pass.GetCopy();
-            part2Pass.Pass = passPart2Bytes;
-            Part2List.Add(part2Pass.Id.Value, part2Pass);
+            Part1 = passPart2Bytes;
+            Part2 = passPart1Bytes;
         }
 
 

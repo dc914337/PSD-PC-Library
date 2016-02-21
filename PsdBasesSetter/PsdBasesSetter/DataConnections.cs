@@ -26,7 +26,7 @@ namespace PsdBasesSetter
 
         private BasePasswords _userPasses;
 
-        public PasswordList Passwords => PcBase.Base.Passwords;
+        public PassGroup RootGroup => PcBase.Base.PassGroup;
 
         public DateTime LastUpdate
         {
@@ -135,29 +135,32 @@ namespace PsdBasesSetter
             byte[] hBtKEy = KeyGenerator.GenerateByteKey(HBtKeyLength);
             byte[] btKey = KeyGenerator.GenerateByteKey(BtKeyLength);
 
-            DividedList dividedList = null;
-            if (PhoneBase == null)
-            {
-                dividedList = new DividedList(new PasswordList());
-            }
-            else
-            {
-                dividedList = new DividedList(PcBase.Base.Passwords);
-            }
 
-            if (PhoneBase != null)
+            if (PhoneBase != null && PsdBase != null)
             {
-                PhoneBase.Base.Passwords = dividedList?.Part1List;
                 PhoneBase.Base.BTKey = btKey;
                 PhoneBase.Base.HBTKey = hBtKEy;
-            }
 
-            if (PsdBase != null)
-            {
-                PsdBase.Base.Passwords = dividedList?.Part2List;
                 PsdBase.Base.BTKey = btKey;
                 PsdBase.Base.HBTKey = hBtKEy;
             }
+
+
+            foreach (var passItem in PcBase.Base.PassGroup)
+            {
+                DividedPassword dPass = new DividedPassword(passItem);
+
+                if (PhoneBase != null)
+                {
+                    PhoneBase.Base.PassGroup.First(a => a.Id == dPass.SrcPass.Id).Pass = dPass?.Part1;
+                }
+
+                if (PsdBase != null)
+                {
+                    PsdBase.Base.PassGroup.First(a => a.Id == dPass.SrcPass.Id).Pass = dPass?.Part2;
+                }
+            }
+
         }
     }
 
