@@ -141,7 +141,7 @@ namespace PsdBasesSetter.Repositories.Objects
 
         public override string ToString()
         {
-            return UUID;
+            return Title;
         }
 
         public void RestoreCopy(PassItem backup)
