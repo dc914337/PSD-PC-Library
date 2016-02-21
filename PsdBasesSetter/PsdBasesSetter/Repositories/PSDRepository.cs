@@ -33,6 +33,9 @@ namespace PsdBasesSetter.Repositories
 
         public SetPsdResult Connect(PSDDevice psdDevice)
         {
+            if (psdDevice == null)
+                return SetPsdResult.NotConnected;
+
             var connected = psdDevice.Connect();
             if (connected)
             {

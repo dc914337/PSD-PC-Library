@@ -1,20 +1,28 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PsdBasesSetter.Repositories.Objects
 {
+    [JsonObject]
     public class PassGroup : IEnumerable<PassItem>
     {
+        [DataMember]
         public String UUID { get; set; }
+        [DataMember]
         public String Name { get; set; }
+        [DataMember]
         public String Notes { get; set; }
 
-        public PasswordList Passwords { get; set; }
-        public PassGroupsList PassGroups { get; set; }
+        [DataMember]
+        public PasswordList Passwords { get; set; } = new PasswordList();
+        [DataMember]
+        public PassGroupsList PassGroups { get; set; } = new PassGroupsList();
 
         public IEnumerator<PassItem> GetEnumerator()
         {
