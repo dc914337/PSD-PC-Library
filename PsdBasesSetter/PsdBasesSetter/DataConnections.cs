@@ -16,6 +16,8 @@ namespace PsdBasesSetter
         public FileRepository PhoneBase { get; private set; }
         public PSDRepository PsdBase { get; private set; }
 
+        public Base MainBase { get; set; }
+
         public String UserPass
         {
             set
@@ -66,7 +68,13 @@ namespace PsdBasesSetter
             if (connectResult == ConnectResult.Success)
                 PcBase = newPcBase;
 
-            return connectResult == ConnectResult.Success;
+            if (connectResult == ConnectResult.Success)
+            {
+                MainBase = PcBase.Base;
+                return true;
+            }
+
+            return false;
         }
 
         public bool TryCreateAndSetPhoneBase(String path)
@@ -135,44 +143,27 @@ namespace PsdBasesSetter
             byte[] hBtKEy = KeyGenerator.GenerateByteKey(HBtKeyLength);
             byte[] btKey = KeyGenerator.GenerateByteKey(BtKeyLength);
 
-
             if (PhoneBase != null && PsdBase != null)
             {
                 PhoneBase.Base.PassGroup.Passwords = new PasswordList();
-                foreach (var item in PcBase.Base.PassGroup)
+                PsdBase.Base.PassGroup.Passwords = new PasswordList();
+                ushort passId = 0;
+                foreach (var passItem in MainBase.PassGroup)
                 {
-                    PhoneBase.Base.PassGroup.Passwords.Add((ushort)item.Id, item.GetCopy());
-                }
+                    passItem.Id = passId++;
+                    var dPass = new DividedPassword(passItem);
+                    var phonePass = passItem.GetCopy();
+                    phonePass.Pass = dPass?.Part1;
+                    var psdPass = passItem.GetCopy();
+                    psdPass.Pass = dPass?.Part2;
 
+                    PhoneBase.Base.PassGroup.Passwords.Add((ushort)passItem.Id, phonePass);
+                    PsdBase.Base.PassGroup.Passwords.Add((ushort)passItem.Id, psdPass);
+                }
                 PhoneBase.Base.BTKey = btKey;
                 PhoneBase.Base.HBTKey = hBtKEy;
-
-                PsdBase.Base.PassGroup.Passwords = new PasswordList();
-                foreach (var item in PcBase.Base.PassGroup)
-                {
-                    PsdBase.Base.PassGroup.Passwords.Add((ushort)item.Id, item.GetCopy());
-                }
-
                 PsdBase.Base.BTKey = btKey;
                 PsdBase.Base.HBTKey = hBtKEy;
-
-            }
-
-
-
-            foreach (var passItem in PcBase.Base.PassGroup)
-            {
-                DividedPassword dPass = new DividedPassword(passItem);
-
-                if (PhoneBase != null)
-                {
-                    PhoneBase.Base.PassGroup.First(a => a.Id == dPass.SrcPass.Id).Pass = dPass?.Part1;
-                }
-
-                if (PsdBase != null)
-                {
-                    PsdBase.Base.PassGroup.First(a => a.Id == dPass.SrcPass.Id).Pass = dPass?.Part2;
-                }
             }
 
         }

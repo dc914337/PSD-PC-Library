@@ -19,7 +19,7 @@ namespace PsdBasesSetter.Repositories.Objects
         }
 
 
-        public PassItem(String UUID, String tags, Strings strings)
+        public PassItem(String UUID, String[] tags, Strings strings)
         {
             Id = null;
             this.UUID = UUID;
@@ -28,7 +28,7 @@ namespace PsdBasesSetter.Repositories.Objects
             TranslatePasswordFromStrings();
         }
 
-        public PassItem(ushort? id, String UUID, String tags, Strings strings, byte[] password)
+        public PassItem(ushort? id, String UUID, String[] tags, Strings strings, byte[] password)
         {
             Id = id;
             this.UUID = UUID;
@@ -121,7 +121,7 @@ namespace PsdBasesSetter.Repositories.Objects
         [DataMember]
         public String UUID { get; set; }
         [DataMember]
-        public String Tags { get; set; }
+        public String[] Tags { get; set; }
         [DataMember]
         public Strings Strings { get; set; } = new Strings();
 
